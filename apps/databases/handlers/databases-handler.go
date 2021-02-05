@@ -5,6 +5,7 @@ import (
 	"github.com/tpmanc/databases/helpers"
 	"github.com/tpmanc/databases/repositories"
 	"github.com/tpmanc/databases/requests"
+	"github.com/tpmanc/databases/responses"
 	"github.com/tpmanc/databases/services"
 	"net/http"
 )
@@ -24,7 +25,8 @@ func DatabasesHandler(w http.ResponseWriter, r *http.Request)  {
 	service := getService()
 
 	items := service.GetAll(req)
-	helpers.ResponseJson(w, items)
+	response := responses.DatabasesResponse{Items: items}
+	helpers.ResponseJson(w, response)
 }
 
 func DatabaseHandler(w http.ResponseWriter, r *http.Request)  {
@@ -42,7 +44,8 @@ func DatabaseHandler(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	helpers.ResponseJson(w, item)
+	response := responses.DatabaseResponse{Item: item}
+	helpers.ResponseJson(w, response)
 }
 
 func DatabasesSaveHandler(w http.ResponseWriter, r *http.Request)  {
@@ -60,7 +63,8 @@ func DatabasesSaveHandler(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	helpers.ResponseJson(w, item)
+	response := responses.DatabasesSaveResponse{Item: item}
+	helpers.ResponseJson(w, response)
 }
 
 func DatabasesDeleteHandler(w http.ResponseWriter, r *http.Request)  {
@@ -74,9 +78,8 @@ func DatabasesDeleteHandler(w http.ResponseWriter, r *http.Request)  {
 
 	res := service.Delete(req)
 	if res {
-		helpers.ResponseJson(w, map[string]string{
-			"result": "ok",
-		})
+		response := responses.DatabasesDeleteResponse{Result: true}
+		helpers.ResponseJson(w, response)
 	} else {
 		helpers.Response500(w, "Delete error")
 	}

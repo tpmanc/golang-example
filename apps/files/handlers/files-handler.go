@@ -5,6 +5,7 @@ import (
 	"github.com/tpmanc/files/helpers"
 	"github.com/tpmanc/files/repositories"
 	"github.com/tpmanc/files/requests"
+	"github.com/tpmanc/files/responses"
 	"github.com/tpmanc/files/services"
 	"net/http"
 )
@@ -24,7 +25,10 @@ func ServersHandler(w http.ResponseWriter, r *http.Request)  {
 	service := getService()
 
 	items := service.GetAll(req)
-	helpers.ResponseJson(w, items)
+	response := responses.FilesResponse{
+		Items: items,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ServerHandler(w http.ResponseWriter, r *http.Request)  {
@@ -42,7 +46,10 @@ func ServerHandler(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	helpers.ResponseJson(w, item)
+	response := responses.FileResponse{
+		Item: item,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ServerSaveHandler(w http.ResponseWriter, r *http.Request)  {
@@ -60,7 +67,10 @@ func ServerSaveHandler(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	helpers.ResponseJson(w, item)
+	response := responses.FilesSaveResponse{
+		Item: item,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ServerDeleteHandler(w http.ResponseWriter, r *http.Request)  {
@@ -74,9 +84,10 @@ func ServerDeleteHandler(w http.ResponseWriter, r *http.Request)  {
 
 	res := service.Delete(req)
 	if res {
-		helpers.ResponseJson(w, map[string]string{
-			"result": "ok",
-		})
+		response := responses.FilesDeleteResponse{
+			Result: true,
+		}
+		helpers.ResponseJson(w, response)
 	} else {
 		helpers.Response500(w, "Delete error")
 	}
