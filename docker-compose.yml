@@ -1,0 +1,144 @@
+version: "3.9"
+
+services:
+  backup_gateway:
+    container_name: backup_gateway
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
+    command: go run -mod vendor main.go
+    environment:
+      - GOPATH=/var/www/app/.go
+    volumes:
+      - ./apps/gateway:/var/www/app/
+    ports:
+      - 8000:8000
+    depends_on:
+      - backup_gateway_db
+  
+  backup_projects:
+    container_name: backup_projects
+    build:
+      context: ./apps/projects
+      dockerfile: Dockerfile
+    command: go run -mod vendor main.go
+    environment:
+      - GOPATH=/var/www/app/vendor
+    volumes:
+      - ./apps/projects:/var/www/app/
+    ports:
+       - 8001:8000
+    depends_on:
+      - backup_project_db
+
+  backup_servers:
+    container_name: backup_servers
+    build:
+      context: ./apps/servers
+      dockerfile: Dockerfile
+    command: go run -mod vendor main.go
+    environment:
+      - GOPATH=/var/www/app/vendor
+    volumes:
+      - ./apps/servers:/var/www/app/
+    ports:
+      - 8002:8000
+    depends_on:
+      - backup_server_db
+
+  backup_files:
+    container_name: backup_files
+    build:
+      context: ./apps/files
+      dockerfile: Dockerfile
+    command: go run -mod vendor main.go
+    environment:
+      - GOPATH=/var/www/app/vendor
+    volumes:
+      - ./apps/files:/var/www/app/
+    ports:
+      - 8003:8000
+    depends_on:
+      - backup_files_db
+
+  backup_databases:
+    container_name: backup_databases
+    build:
+      context: ./apps/databases
+      dockerfile: Dockerfile
+    command: go run -mod vendor main.go
+    environment:
+      - GOPATH=/var/www/app/vendor
+    volumes:
+      - ./apps/databases:/var/www/app/
+    ports:
+      - 8004:8000
+    depends_on:
+      - backup_databases_db
+
+  backup_gateway_db:
+    container_name: backup_gateway_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker/postgres/data/gateway:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  backup_project_db:
+    container_name: backup_project_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker/postgres/data/projects:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
+  backup_server_db:
+    container_name: backup_server_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker/postgres/data/servers:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+
+  backup_files_db:
+    container_name: backup_files_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker/postgres/data/files:/var/lib/postgresql/data
+    ports:
+      - 5435:5432
+
+  backup_databases_db:
+    container_name: backup_databases_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker/postgres/data/databases:/var/lib/postgresql/data
+    ports:
+      - 5436:5432
+volumes:
+  logvolume01: {}
