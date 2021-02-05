@@ -8,6 +8,14 @@ type Project struct {
 	Title string
 }
 
-func (model *Project) Validate() bool {
-	return false
+func (m *Project) Validate() (bool, string) {
+	if m.UserId <= 0 {
+		return false, "userId is required"
+	}
+
+	if len(m.Title) < 2 {
+		return false, "title is required"
+	}
+
+	return true, ""
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/tpmanc/go-projects/helpers"
 	"github.com/tpmanc/go-projects/repositories"
 	"github.com/tpmanc/go-projects/requests"
+	"github.com/tpmanc/go-projects/responses"
 	"github.com/tpmanc/go-projects/services"
 	"net/http"
 )
@@ -16,12 +17,19 @@ func getProjectService() services.ProjectServiceInterface {
 }
 
 func ProjectsHandler(w http.ResponseWriter, r *http.Request) {
-	req := requests.ParseProjectsRequest(r)
+	req, err := requests.ParseProjectsRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getProjectService()
 	items := service.GetAll(req)
 
-	helpers.ResponseJson(w, items)
+	response := &responses.ProjectsResponse{
+		Items: items,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ProjectHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +47,10 @@ func ProjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.ResponseJson(w, item)
+	response := &responses.ProjectResponse{
+		Item: item,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ProjectSaveHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,9 +60,15 @@ func ProjectSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	service := getProjectService()
-	item := service.Save(request)
+	item, err := service.Save(request)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+	}
 
-	helpers.ResponseJson(w, item)
+	response := &responses.ProjectSaveResponse{
+		Item: item,
+	}
+	helpers.ResponseJson(w, response)
 }
 
 func ProjectDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +85,8 @@ func ProjectDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helpers.ResponseJson(w, map[string]bool{
-		"result": true,
-	})
+	response := &responses.ProjectDeleteResponse{
+		Result: true,
+	}
+	helpers.ResponseJson(w, response)
 }

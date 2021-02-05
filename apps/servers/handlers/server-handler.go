@@ -15,7 +15,11 @@ func getService() services.ServerServiceInterface {
 }
 
 func ServersHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseServersRequest(r)
+	req, err := requests.ParseServersRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 
@@ -24,25 +28,47 @@ func ServersHandler(w http.ResponseWriter, r *http.Request)  {
 }
 
 func ServerHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseServerRequest(r)
+	req, err := requests.ParseServerRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 
 	item := service.GetOne(req)
+	if item == nil {
+		helpers.Response404(w, "Server not found")
+		return
+	}
+
 	helpers.ResponseJson(w, item)
 }
 
 func ServerSaveHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseServerSaveRequest(r)
+	req, err := requests.ParseServerSaveRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 
-	item := service.Save(req)
+	item, err := service.Save(req)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
+
 	helpers.ResponseJson(w, item)
 }
 
 func ServerDeleteHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseServerDeleteRequest(r)
+	req, err := requests.ParseServerDeleteRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 

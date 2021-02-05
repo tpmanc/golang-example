@@ -15,7 +15,12 @@ func getService() services.DatabasesServiceInterface {
 }
 
 func DatabasesHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseDatabasesRequest(r)
+	req, err := requests.ParseDatabasesRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
+
 	service := getService()
 
 	items := service.GetAll(req)
@@ -23,25 +28,47 @@ func DatabasesHandler(w http.ResponseWriter, r *http.Request)  {
 }
 
 func DatabaseHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseDatabaseRequest(r)
+	req, err := requests.ParseDatabaseRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 
 	item := service.GetOne(req)
+	if item == nil {
+		helpers.Response404(w, "Item not found")
+		return
+	}
+
 	helpers.ResponseJson(w, item)
 }
 
 func DatabasesSaveHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseDatabasesSaveRequest(r)
+	req, err := requests.ParseDatabasesSaveRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 
-	item := service.Save(req)
+	item, err := service.Save(req)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
+
 	helpers.ResponseJson(w, item)
 }
 
 func DatabasesDeleteHandler(w http.ResponseWriter, r *http.Request)  {
-	req := requests.ParseDatabasesDeleteRequest(r)
+	req, err := requests.ParseDatabasesDeleteRequest(r)
+	if err != nil {
+		helpers.Response400(w, err.Error())
+		return
+	}
 
 	service := getService()
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/tpmanc/databases/models"
 	"github.com/tpmanc/databases/repositories"
 	"github.com/tpmanc/databases/requests"
@@ -9,7 +10,7 @@ import (
 type DatabasesServiceInterface interface {
 	GetAll(r *requests.DatabasesRequest) *[]models.Databases
 	GetOne(r *requests.DatabaseRequest) *models.Databases
-	Save(r *requests.DatabasesSaveRequest) *models.Databases
+	Save(r *requests.DatabasesSaveRequest) (*models.Databases, error)
 	Delete(r *requests.DatabasesDeleteRequest) bool
 }
 
@@ -25,7 +26,7 @@ func (s *databasesService) GetOne(r *requests.DatabaseRequest) *models.Databases
 	return s.rep.GetById(r.Id)
 }
 
-func (s *databasesService) Save(r *requests.DatabasesSaveRequest) *models.Databases {
+func (s *databasesService) Save(r *requests.DatabasesSaveRequest) (*models.Databases, error) {
 	var model models.Databases
 
 	if len(r.Id) == 0 {
@@ -33,17 +34,29 @@ func (s *databasesService) Save(r *requests.DatabasesSaveRequest) *models.Databa
 		model.User = r.User
 		model.Password = r.Password
 		model.Database = r.Database
-		s.rep.Create(&model)
+
+		isValid, err := model.Validate()
+		if isValid {
+			s.rep.Create(&model)
+		} else {
+			return nil, errors.New(err)
+		}
 	} else {
 		model = *s.rep.GetById(r.Id)
 		model.ServerId = r.ServerId
 		model.User = r.User
 		model.Password = r.Password
 		model.Database = r.Database
-		s.rep.Update(&model)
+
+		isValid, err := model.Validate()
+		if isValid {
+			s.rep.Update(&model)
+		} else {
+			return nil, errors.New(err)
+		}
 	}
 
-	return &model
+	return &model, nil
 }
 
 func (s *databasesService) Delete(r *requests.DatabasesDeleteRequest) bool {

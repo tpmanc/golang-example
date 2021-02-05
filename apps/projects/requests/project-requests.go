@@ -10,13 +10,17 @@ import (
 type ProjectsRequest struct {
 	UserId int
 }
-func ParseProjectsRequest(r *http.Request) *ProjectsRequest {
+func ParseProjectsRequest(r *http.Request) (*ProjectsRequest, error) {
 	vars := mux.Vars(r)
 	userId, _ := strconv.Atoi(vars["userId"])
 
+	if userId <= 0 {
+		return nil, errors.New("userId is required")
+	}
+
 	return &ProjectsRequest{
 		UserId: userId,
-	}
+	}, nil
 }
 
 type ProjectGetByIdRequest struct {
@@ -24,8 +28,8 @@ type ProjectGetByIdRequest struct {
 }
 func ParseProjectGetByIdRequest(r *http.Request) (*ProjectGetByIdRequest, error) {
 	vars := mux.Vars(r)
-	id, isOk := vars["id"]
-	if !isOk {
+	id := vars["id"]
+	if id != "" {
 		return nil, errors.New("invalid request")
 	}
 	return &ProjectGetByIdRequest{Id: id}, nil
@@ -44,6 +48,9 @@ func ParseProjectSaveRequest(r *http.Request) (*ProjectSaveRequest, error) {
 
 	if len(title) == 0 {
 		return nil, errors.New("title is required")
+	}
+	if userId <= 0 {
+		return nil, errors.New("userId is required")
 	}
 
 	return &ProjectSaveRequest{

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"github.com/tpmanc/servers/models"
 	"github.com/tpmanc/servers/repositories"
 	"github.com/tpmanc/servers/requests"
@@ -9,7 +10,7 @@ import (
 type ServerServiceInterface interface {
 	GetAll(r *requests.ServersRequest) *[]models.Server
 	GetOne(r *requests.ServerRequest) *models.Server
-	Save(r *requests.ServerSaveRequest) *models.Server
+	Save(r *requests.ServerSaveRequest) (*models.Server, error)
 	Delete(r *requests.ServerDeleteRequest) bool
 }
 
@@ -25,7 +26,7 @@ func (s *serverService) GetOne(r *requests.ServerRequest) *models.Server {
 	return s.rep.GetById(r.Id)
 }
 
-func (s *serverService) Save(r *requests.ServerSaveRequest) *models.Server {
+func (s *serverService) Save(r *requests.ServerSaveRequest) (*models.Server, error) {
 	var model models.Server
 
 	if len(r.Id) == 0 {
@@ -34,7 +35,12 @@ func (s *serverService) Save(r *requests.ServerSaveRequest) *models.Server {
 		model.User = r.User
 		model.Password = r.Password
 		model.Port = r.Port
-		s.rep.Create(&model)
+		isValid, err := model.Validate()
+		if isValid {
+			s.rep.Create(&model)
+		} else {
+			errors.New(err)
+		}
 	} else {
 		model = *s.rep.GetById(r.Id)
 		model.ProjectId = r.ProjectId
@@ -42,10 +48,16 @@ func (s *serverService) Save(r *requests.ServerSaveRequest) *models.Server {
 		model.User = r.User
 		model.Password = r.Password
 		model.Port = r.Port
-		s.rep.Update(&model)
+
+		isValid, err := model.Validate()
+		if isValid {
+			s.rep.Update(&model)
+		} else {
+			errors.New(err)
+		}
 	}
 
-	return &model
+	return &model, nil
 }
 
 func (s *serverService) Delete(r *requests.ServerDeleteRequest) bool {

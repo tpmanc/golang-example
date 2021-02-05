@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -9,27 +10,29 @@ import (
 type DatabasesRequest struct {
 	ServerId int
 }
-func ParseDatabasesRequest(r *http.Request) *DatabasesRequest {
+func ParseDatabasesRequest(r *http.Request) (*DatabasesRequest, error) {
 	serverId, _ := strconv.Atoi(mux.Vars(r)["serverId"])
-
-	req := &DatabasesRequest{
-		ServerId: serverId,
+	if serverId <= 0 {
+		return nil, errors.New("serverId is required")
 	}
 
-	return req
+	return &DatabasesRequest{
+		ServerId: serverId,
+	}, nil
 }
 
 type DatabaseRequest struct {
 	Id string
 }
-func ParseDatabaseRequest(r *http.Request) *DatabaseRequest {
+func ParseDatabaseRequest(r *http.Request) (*DatabaseRequest, error) {
 	id := mux.Vars(r)["id"]
-
-	req := &DatabaseRequest{
-		Id: id,
+	if len(id) == 0 {
+		return nil, errors.New("ID is required")
 	}
 
-	return req
+	return &DatabaseRequest{
+		Id: id,
+	}, nil
 }
 
 type DatabasesSaveRequest struct {
@@ -39,27 +42,44 @@ type DatabasesSaveRequest struct {
 	Password string
 	Database string
 }
-func ParseDatabasesSaveRequest(r *http.Request) *DatabasesSaveRequest {
+func ParseDatabasesSaveRequest(r *http.Request) (*DatabasesSaveRequest, error) {
 	serverId, _ := strconv.Atoi(r.FormValue("serverId"))
+	user := r.FormValue("user")
+	password := r.FormValue("password")
+	database := r.FormValue("database")
 
-	req := &DatabasesSaveRequest{
-		Id: r.FormValue("id"),
-		ServerId: serverId,
-		User: r.FormValue("user"),
-		Password: r.FormValue("password"),
-		Database: r.FormValue("database"),
+	if serverId <= 0 {
+		return nil, errors.New("serverId is required")
+	}
+	if len(user) <= 2 {
+		return nil, errors.New("user is required")
+	}
+	if len(password) <= 2 {
+		return nil, errors.New("password is required")
+	}
+	if len(database) <= 2 {
+		return nil, errors.New("database is required")
 	}
 
-	return req
+	return &DatabasesSaveRequest{
+		Id: r.FormValue("id"),
+		ServerId: serverId,
+		User: user,
+		Password: password,
+		Database: database,
+	}, nil
 }
 
 type DatabasesDeleteRequest struct {
 	Id string
 }
-func ParseDatabasesDeleteRequest(r *http.Request) *DatabasesDeleteRequest {
-	req := &DatabasesDeleteRequest{
-		Id: r.FormValue("id"),
+func ParseDatabasesDeleteRequest(r *http.Request) (*DatabasesDeleteRequest, error) {
+	id := r.FormValue("id")
+	if len(id) == 0 {
+		return nil, errors.New("id is required")
 	}
 
-	return req
+	return &DatabasesDeleteRequest{
+		Id: id,
+	}, nil
 }
